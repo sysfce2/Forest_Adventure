@@ -1,13 +1,13 @@
 /*
- *	Copyright (C) 2023 Anders Wennmo
+ *	Copyright (C) 2024 Anders Wennmo
  *	This file is part of forestadventure which is released under MIT license.
  *	See file LICENSE for full license details.
  */
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "Resource/Frame.h"
-#include "TextureIf.h"
+#include "Resource/ColliderData.h"
 
 using namespace testing;
 
@@ -15,14 +15,12 @@ namespace FA {
 
 namespace Shared {
 
-TEST(FrameTest, TestFrameEqualToOperator)
+TEST(ColliderDataTest, TestColliderDataEqualToOperator)
 {
-    sf::IntRect rect{12, 12, 10, 10};
-    Graphic::TextureIf* texture = nullptr;
-    Frame d1{texture, rect};
-    Frame d2 = d1;
+    ColliderData d1{{"sheet1", {0, 0}}};
+    ColliderData d2 = d1;
     EXPECT_TRUE(d1 == d2);
-    d1.rect_.left = 399;
+    d1.sheetItem_.id_ = "mysheet";
     EXPECT_FALSE(d1 == d2);
 }
 

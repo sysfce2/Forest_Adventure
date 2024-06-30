@@ -10,21 +10,22 @@ namespace FA {
 
 namespace Graphic {
 
-class SpriteIf;
+class RectangleShapeIf;
 
 }  // namespace Graphic
 
-namespace Shared {
+namespace Entity {
 
-class CoolSpriteIf
+class BasicColliderPart
 {
 public:
-    virtual ~CoolSpriteIf() = default;
+    virtual ~BasicColliderPart() = default;
 
+    virtual void Enter() = 0;
     virtual void Update(float deltaTime) = 0;
-    virtual void ApplyTo(Graphic::SpriteIf &sprite) const = 0;
+    virtual void ApplyTo(Graphic::RectangleShapeIf &rectShape) const = 0;
 };
 
-}  // namespace Shared
+}  // namespace Entity
 
 }  // namespace FA

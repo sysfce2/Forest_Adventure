@@ -17,9 +17,12 @@
 #include "Events/StartMoveEvent.h"
 #include "PropertyConverter.h"
 #include "PropertyData.h"
+#include "Resource/ColliderData.h"
 #include "Resource/ImageData.h"
 #include "Resource/SheetId.h"
-#include "ShapeParts/ImagePart.h"
+#include "Resource/SheetItem.h"
+#include "ShapeParts/AnimationPart.h"
+#include "ShapeParts/ColliderPart.h"
 #include "State.h"
 
 namespace FA {
@@ -27,6 +30,13 @@ namespace FA {
 namespace Entity {
 
 namespace {
+
+using namespace Shared::SheetId;
+
+const Shared::SheetItem arrow{Arrow, {0, 0}};
+
+const std::vector<Shared::ImageData> images{arrow};
+const std::vector<Shared::ColliderData> colliders{arrow};
 
 const std::unordered_map<MoveDirection, float> arrowRotation = {{MoveDirection::Down, 180.0f},
                                                                 {MoveDirection::Left, 270.0f},
@@ -118,16 +128,18 @@ void ArrowEntity::RegisterStates(std::shared_ptr<State> idleState, std::shared_p
 {
     idleState->RegisterEventCB(EventType::StartMove,
                                [this](std::shared_ptr<BasicEvent> event) { ChangeStateTo(StateType::Move, event); });
-    idleState->RegisterIgnoreEvents({EventType::Collision});
 
     auto moveState = RegisterState(StateType::Move);
+    auto imageAnimation = Shared::ImageAnimation(service_.CreateSequence(images));
+    auto shapePart = AnimationPart::Create(imageAnimation);
+    moveState->RegisterShapePart(shapePart);
+    auto colliderAnimation = Shared::ColliderAnimation(service_.CreateSequence(colliders));
+    auto colliderPart = ColliderPart::Create(colliderAnimation);
+    moveState->RegisterColliderPart(colliderPart);
     auto move = std::make_shared<MoveAbility>(
         Constant::stdVelocity * 8.0f, [this](MoveDirection d) { OnBeginMove(d); },
         [this](const sf::Vector2f& d) { OnUpdateMove(d); });
-    auto image = service_.MakeImage({Shared::SheetId::Arrow, {0, 0}});
-    auto part = ImagePart::Create(image);
     moveState->RegisterAbility(move);
-    moveState->RegisterShapePart(part);
     moveState->RegisterEventCB(EventType::StopMove,
                                [this](std::shared_ptr<BasicEvent> event) { ChangeStateTo(StateType::Idle, event); });
     moveState->RegisterEventCB(EventType::Collision, [this](std::shared_ptr<BasicEvent> event) {

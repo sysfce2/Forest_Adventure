@@ -1,3 +1,4 @@
+#pragma once
 /*
  *	Copyright (C) 2024 Anders Wennmo
  *	This file is part of forestadventure which is released under MIT license.
@@ -6,21 +7,28 @@
 
 #pragma once
 
-#include "CoolSpriteIf.h"
+#include "SfmlFwd.h"
 
 namespace FA {
 
+namespace Graphic {
+
+class RectangleShapeIf;
+
+}  // namespace Graphic
+
 namespace Shared {
 
-struct Frame;
+struct ColliderFrame;
 
-class AnimationSpriteIf : public CoolSpriteIf
+class ColliderAnimationIf
 {
 public:
+    virtual void Update(float deltaTime) = 0;
+    virtual void ApplyTo(Graphic::RectangleShapeIf &rectShape, bool center) const = 0;
     virtual void Start() = 0;
     virtual void Stop() = 0;
     virtual bool IsCompleted() const = 0;
-    virtual void AddFrame(const Frame &frame) = 0;
 };
 
 }  // namespace Shared

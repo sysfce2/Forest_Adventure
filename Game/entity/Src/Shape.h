@@ -15,6 +15,7 @@
 #include "RectangleShape.h"
 #endif
 
+#include "ShapeParts/BasicColliderPart.h"
 #include "ShapeParts/BasicShapePart.h"
 
 namespace FA {
@@ -23,6 +24,7 @@ namespace Graphic {
 
 class RenderTargetIf;
 class SpriteIf;
+class RectangleShapeIf;
 
 }  // namespace Graphic
 
@@ -36,20 +38,31 @@ public:
     Shape(Body &body);
     ~Shape();
 
-    void RegisterPart(std::shared_ptr<BasicShapePart> part);
+    void RegisterShapePart(std::shared_ptr<BasicShapePart> part);
+    void RegisterColliderPart(std::shared_ptr<BasicColliderPart> part);
     void Enter();
     void Update(float deltaTime);
     void DrawTo(Graphic::RenderTargetIf &renderTarget) const;
     bool Intersect(const Shape &shape) const;
 
 private:
-    std::vector<std::shared_ptr<BasicShapePart>> parts_;
+    struct ShapePartEntry
+    {
+        std::shared_ptr<BasicShapePart> part_;
+        std::shared_ptr<Graphic::SpriteIf> sprite_{};
+    };
+
+    struct ColliderPartEntry
+    {
+        std::shared_ptr<BasicColliderPart> part_;
+        std::shared_ptr<Graphic::RectangleShapeIf> hitRect_{};
+    };
+
+    std::vector<ColliderPartEntry> colliderParts_;
+    std::vector<ShapePartEntry> shapeParts_;
     Body &body_;
-    std::vector<std::shared_ptr<Graphic::SpriteIf>> sprites_;
-    std::vector<sf::FloatRect> hitBoxes_;
 #ifdef _DEBUG
     Graphic::RectangleShape rShape_;
-    std::vector<std::shared_ptr<Graphic::RectangleShape>> hitSprites_;
 #endif  // _DEBUG
 };
 

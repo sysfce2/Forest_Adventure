@@ -6,11 +6,8 @@
 
 #include "Resource/SheetManager.h"
 
-#include <algorithm>
-
 #include "Logging.h"
-#include "Resource/AnimationData.h"
-#include "Resource/ImageData.h"
+#include "Resource/SheetItem.h"
 #include "Resource/SpriteSheet.h"
 #include "Resource/TextureRect.h"
 
@@ -23,25 +20,11 @@ void SheetManager::AddSheet(const std::string& name, std::unique_ptr<SpriteSheet
     sheetMap_.insert({name, std::move(sheet)});
 }
 
-std::vector<TextureRect> SheetManager::MakeRects(const AnimationData& data) const
+TextureRect SheetManager::GetTextureRect(const SheetItem& item) const
 {
-    auto location = data.locationData_;
-    auto sheet = GetSheet(data.sheetId_);
+    auto sheet = GetSheet(item.id_);
     if (sheet != nullptr) {
-        auto rects = sheet->Scan(location.start_, location.nRects_);
-        auto range = data.locationData_.defaultIndex_;
-        std::rotate(rects.begin(), rects.begin() + range, rects.end());
-        return data.mirror_ ? MirrorX(rects) : rects;
-    }
-
-    return {};
-}
-
-TextureRect SheetManager::MakeRect(const ImageData& data) const
-{
-    auto sheet = GetSheet(data.sheetId_);
-    if (sheet != nullptr) {
-        auto rect = sheet->At(data.position_);
+        auto rect = sheet->At(item.position_);
         return rect;
     }
 
@@ -59,20 +42,6 @@ SpriteSheetIf* SheetManager::GetSheet(const std::string& sheetId) const
         LOG_ERROR("%s not found", DUMP(sheetId));
         return nullptr;
     }
-}
-
-std::vector<TextureRect> SheetManager::MirrorX(const std::vector<TextureRect>& rects) const
-{
-    std::vector<TextureRect> mirrorRects;
-
-    for (const auto& rect : rects) {
-        TextureRect r = rect;
-        r.position_.x = r.position_.x + r.size_.x;
-        r.size_.x = -rect.size_.x;
-        mirrorRects.push_back(r);
-    }
-
-    return mirrorRects;
 }
 
 }  // namespace Shared

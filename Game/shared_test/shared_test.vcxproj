@@ -34,16 +34,16 @@
   <PropertyGroup Label="UserMacros" />
   <ItemGroup>
     <ClCompile Include="..\packages\gmock.1.11.0\lib\native\src\gtest\src\gtest_main.cc" />
-    <ClCompile Include="Src\AnimationData_test.cpp" />
-    <ClCompile Include="Src\AnimationSprite_test.cpp" />
-    <ClCompile Include="Src\BasicCoolSprite_test.cpp" />
+    <ClCompile Include="Src\ImageAnimation_test.cpp" />
     <ClCompile Include="Src\CameraView_test.cpp" />
-    <ClCompile Include="Src\Frame_test.cpp" />
+    <ClCompile Include="Src\ColliderData_test.cpp" />
+    <ClCompile Include="Src\ImageFrame_test.cpp" />
     <ClCompile Include="Src\ImageData_test.cpp" />
-    <ClCompile Include="Src\ImageSprite_test.cpp" />
     <ClCompile Include="Src\Mock\LoggerMock.cpp" />
     <ClCompile Include="Src\ResourceManager_test.cpp" />
+    <ClCompile Include="Src\Sequence_test.cpp" />
     <ClCompile Include="Src\SheetData_test.cpp" />
+    <ClCompile Include="Src\SheetItem_test.cpp" />
     <ClCompile Include="Src\SheetManager_test.cpp" />
     <ClCompile Include="Src\SpriteSheet_test.cpp" />
     <ClCompile Include="Src\TextureRect_test.cpp" />
@@ -59,6 +59,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\Mock\LoggerMock.h" />
+    <ClInclude Include="Src\Mock\SequenceMock.h" />
     <ClInclude Include="Src\Mock\SpriteSheetMock.h" />
   </ItemGroup>
   <ItemDefinitionGroup />

@@ -4,9 +4,11 @@
  *	See file LICENSE for full license details.
  */
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include "Resource/ImageData.h"
+#include "Resource/SheetItem.h"
 
 using namespace testing;
 
@@ -14,15 +16,23 @@ namespace FA {
 
 namespace Shared {
 
-TEST(ImageDataTest, TestImageDataEqualToOperator)
+TEST(ImageDataTest, CtorShouldDefaultInitializedMirror)
 {
-    ImageData d1{"sheet1", {0, 0}};
-    ImageData d2 = d1;
-    EXPECT_TRUE(d1 == d2);
-    d1.sheetId_ = "mysheet";
-    EXPECT_FALSE(d1 == d2);
+    ImageData d{{"sheet1", {2, 2}}};
+    ImageData expected;
+    expected.sheetItem_ = {"sheet1", {2, 2}};
+    expected.mirror_ = false;
+    EXPECT_THAT(d, Eq(expected));
 }
 
+TEST(ImageDataTest, TestImageDataEqualToOperator)
+{
+    ImageData d1{{"sheet1", {0, 0}}};
+    ImageData d2 = d1;
+    EXPECT_TRUE(d1 == d2);
+    d1.sheetItem_.id_ = "mysheet";
+    EXPECT_FALSE(d1 == d2);
+}
 }  // namespace Shared
 
 }  // namespace FA

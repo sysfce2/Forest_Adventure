@@ -12,13 +12,16 @@
 #include "EntityManager.h"
 #include "Enum/EntityType.h"
 #include "Message/MessageBus.h"
-#include "Resource/AnimationData.h"
+#include "Resource/ColliderData.h"
+#include "Resource/ColliderFrame.h"
 #include "Resource/ImageData.h"
+#include "Resource/ImageFrame.h"
+#include "Resource/SheetId.h"
+#include "Resource/SheetItem.h"
 #include "Resource/SheetManager.h"
 #include "Resource/TextureManager.h"
 #include "Resource/TextureRect.h"
-#include "Sprites/AnimationSprite.h"
-#include "Sprites/ImageSprite.h"
+#include "Sequence.h"
 
 namespace FA {
 
@@ -36,35 +39,57 @@ EntityService::EntityService(Shared::MessageBus& messageBus, const Shared::Textu
 
 EntityService::~EntityService() = default;
 
-Shared::AnimationSprite EntityService::MakeAnimation(const Shared::AnimationData& data) const
+std::shared_ptr<Shared::Sequence<Shared::ImageFrame>> EntityService::CreateSequence(
+    const std::vector<Shared::ImageData>& images) const
 {
     float t = Constant::stdSwitchTime;
-    Shared::AnimationSprite animation(t);
-    auto rects = sheetManager_.MakeRects(data);
+    auto seq = std::make_shared<Shared::Sequence<Shared::ImageFrame>>(t);
 
-    for (const auto& rect : rects) {
-        const auto* texture = textureManager_.Get(rect.id_);
-        animation.AddFrame({texture, {rect.position_.x, rect.position_.y, rect.size_.x, rect.size_.y}});
+    for (const auto& image : images) {
+        auto textureRect = sheetManager_.GetTextureRect(image.sheetItem_);
+        auto textureSize = sf::Vector2i(textureRect.rect_.width, textureRect.rect_.height);
+        textureRect = image.mirror_ ? MirrorX(textureRect) : textureRect;
+        const auto* texture = textureManager_.Get(textureRect.id_);
+        sf::Vector2i center = textureSize / 2;
+        seq->Add({texture, textureRect.rect_, static_cast<sf::Vector2f>(center)});
     }
 
-    return animation;
+    return seq;
 }
 
-Shared::ImageSprite EntityService::MakeImage(const Shared::ImageData& data) const
+std::shared_ptr<Shared::Sequence<Shared::ColliderFrame>> EntityService::CreateSequence(
+    const std::vector<Shared::ColliderData>& colliders) const
 {
-    auto rect = sheetManager_.MakeRect(data);
-    const auto* texture = textureManager_.Get(rect.id_);
-    return Shared::ImageSprite({texture, {rect.position_.x, rect.position_.y, rect.size_.x, rect.size_.y}});
-}
+    float t = Constant::stdSwitchTime;
+    auto seq = std::make_shared<Shared::Sequence<Shared::ColliderFrame>>(t);
 
-Shared::TextureRect EntityService::MakeRect(const Shared::ImageData& data) const
-{
-    return sheetManager_.MakeRect(data);
-}
+    for (const auto& collider : colliders) {
+        Shared::ColliderFrame frame{};
+        sf::Vector2i colliderSize{};
+        sf::Vector2i center{};
 
-const Graphic::TextureIf* EntityService::GetTexture(Shared::ResourceId id) const
-{
-    return textureManager_.Get(id);
+        if (collider.sheetItem_.id_ == Shared::SheetId::Unknown) {
+            colliderSize = {collider.rect_.width, collider.rect_.height};
+            center = colliderSize / 2;
+        }
+        else {
+            auto textureRect = sheetManager_.GetTextureRect(collider.sheetItem_);
+            sf::Vector2i spriteSize{textureRect.rect_.width, textureRect.rect_.height};
+            colliderSize = spriteSize;
+
+            if (collider.rect_ != sf::IntRect{}) {
+                colliderSize = {collider.rect_.width, collider.rect_.height};
+            }
+            center = spriteSize / 2;
+            center.x -= collider.rect_.left;
+            center.y -= collider.rect_.top;
+        }
+
+        frame = {static_cast<sf::Vector2f>(colliderSize), static_cast<sf::Vector2f>(center)};
+        seq->Add(frame);
+    }
+
+    return seq;
 }
 
 void EntityService::SendMessage(std::shared_ptr<Shared::Message> msg)
@@ -102,6 +127,15 @@ void EntityService::DeleteEntity(EntityId id)
 EntityType EntityService::GetType(EntityId id) const
 {
     return entityManager_.GetType(id);
+}
+
+Shared::TextureRect EntityService::MirrorX(const Shared::TextureRect& textureRect) const
+{
+    Shared::TextureRect mirrorRect = textureRect;
+    mirrorRect.rect_.left = mirrorRect.rect_.left + mirrorRect.rect_.width;
+    mirrorRect.rect_.width = -textureRect.rect_.width;
+
+    return mirrorRect;
 }
 
 }  // namespace Entity

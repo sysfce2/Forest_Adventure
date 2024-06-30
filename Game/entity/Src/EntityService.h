@@ -17,26 +17,22 @@
 
 namespace FA {
 
-namespace Graphic {
-
-class SpriteIf;
-
-}
-
 namespace Shared {
 
 class CameraViews;
 class CameraView;
-class AnimationSprite;
-class ImageSprite;
 class SheetManager;
-struct AnimationData;
 struct ImageData;
+struct ColliderData;
+struct ImageFrame;
+struct ColliderFrame;
 class MessageBus;
 class Message;
 enum class MessageType;
 struct MapData;
 struct TextureRect;
+template <class T>
+class Sequence;
 
 }  // namespace Shared
 
@@ -54,11 +50,10 @@ public:
                   EntityManager &entityManager);
     ~EntityService();
 
-    Shared::AnimationSprite MakeAnimation(const Shared::AnimationData &data) const;
-    Shared::ImageSprite MakeImage(const Shared::ImageData &data) const;
-
-    Shared::TextureRect MakeRect(const Shared::ImageData &data) const;
-    const Graphic::TextureIf *GetTexture(Shared::ResourceId id) const;
+    std::shared_ptr<Shared::Sequence<Shared::ImageFrame>> CreateSequence(
+        const std::vector<Shared::ImageData> &images) const;
+    std::shared_ptr<Shared::Sequence<Shared::ColliderFrame>> CreateSequence(
+        const std::vector<Shared::ColliderData> &colliders) const;
 
     void SendMessage(std::shared_ptr<Shared::Message> msg);
     void AddSubscriber(const std::string &subscriber, const std::vector<Shared::MessageType> &messageTypes,
@@ -76,6 +71,9 @@ private:
     const Shared::SheetManager &sheetManager_;
     const Shared::CameraViews &cameraViews_;
     EntityManager &entityManager_;
+
+private:
+    Shared::TextureRect MirrorX(const Shared::TextureRect &textureRect) const;
 };
 
 }  // namespace Entity
